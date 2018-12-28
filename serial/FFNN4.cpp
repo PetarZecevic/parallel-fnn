@@ -12,55 +12,56 @@ FFNN4::FFNN4(unsigned int neuronsInput,unsigned int neuronsHidden1,
     	activation = act;
     }
     
-void FFNN4::setInput(const std::vector<float>& in)
-{
-    input = in;
+void FFNN4::setInput(const std::vector<double>& in)
+{   
+    if(in.size() != input.size())
+        return;
+    else
+        input = in;
 }
-void FFNN4::setWeightMatrices(const std::vector< std::vector <float> >& w1, const std::vector< std::vector<float> >& w2, const std::vector< std::vector<float> >& w3)
+
+void FFNN4::setWeightMatrices(const std::vector< std::vector <double> >& w1, const std::vector< std::vector<double> >& w2, const std::vector< std::vector<double> >& w3)
 {
-    hiddenLayer1.setWeightMatrix(w1);
-    hiddenLayer2.setWeightMatrix(w2);
-    outputLayer.setWeightMatrix(w3);
+    // Check dimensions
+    if(w1.size() != hiddenLayer1.getNeuronsNumLayer() ||
+        w1[0].size() != hiddenLayer1.getNeuronsNumPrevLayer() ||
+        w2.size() != hiddenLayer2.getNeuronsNumLayer() ||
+        w2[0].size() != hiddenLayer2.getNeuronsNumPrevLayer() ||
+        w3.size() != outputLayer.getNeuronsNumLayer() ||
+        w3[0].size() != outputLayer.getNeuronsNumPrevLayer())
+    {
+            return;
+    }
+    else
+    {
+        hiddenLayer1.setWeightMatrix(w1);
+        hiddenLayer2.setWeightMatrix(w2);
+        outputLayer.setWeightMatrix(w3);
+    }
 }
+
 void FFNN4::calculateOutput(void)
 {
-    inputLayer.setInput(input);
-    inputLayer.calculateOutput();
-    std::vector<float> inputOut = inputLayer.getOutput();
-
-    hiddenLayer1.setInput(inputOut);
-    hiddenLayer1.calculateOutput();
-    std::vector<float> hiddenOut1 = hiddenLayer1.getOutput();
-
-    hiddenLayer2.setInput(hiddenOut1);
-    hiddenLayer2.calculateOutput();
-    std::vector<float> hiddenOut2 = hiddenLayer2.getOutput();
-
-    outputLayer.setInput(hiddenOut2);
-    outputLayer.calculateOutput();
-    output = outputLayer.getOutput();
+    std::vector<double> result1 = inputLayer.calculateOutput(input);
+    std::vector<double> result2 = hiddenLayer1.calculateOutput(result1);
+    std::vector<double> result3 = hiddenLayer2.calculateOutput(result2);
+    output = outputLayer.calculateOutput(result3);
 }
 
-std::vector<float> FFNN4::calculateOutput(const std::vector<float>& in)
+std::vector<double> FFNN4::calculateOutput(const std::vector<double>& in)
 {
-	inputLayer.setInput(in);
-    inputLayer.calculateOutput();
-    std::vector<float> inputOut = inputLayer.getOutput();
-
-    hiddenLayer1.setInput(inputOut);
-    hiddenLayer1.calculateOutput();
-    std::vector<float> hiddenOut1 = hiddenLayer1.getOutput();
-
-    hiddenLayer2.setInput(hiddenOut1);
-    hiddenLayer2.calculateOutput();
-    std::vector<float> hiddenOut2 = hiddenLayer2.getOutput();
-
-    outputLayer.setInput(hiddenOut2);
-    outputLayer.calculateOutput();
-    return outputLayer.getOutput();
+    if(in.size() != inputLayer.getNeuronsNumLayer())
+        return std::vector<double>{0};
+    else
+    {
+        std::vector<double> result1 = inputLayer.calculateOutput(in);
+        std::vector<double> result2 = hiddenLayer1.calculateOutput(result1);
+        std::vector<double> result3 = hiddenLayer2.calculateOutput(result2);
+        return outputLayer.calculateOutput(result3);
+    }
 }
 
-std::vector<float> FFNN4::getOutput(void) const
+std::vector<double> FFNN4::getOutput(void) const
 {
     return output;
 }

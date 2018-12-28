@@ -15,27 +15,32 @@ class Layer
 {
 	unsigned int neuronsInPreviousLayer;
 	unsigned int neuronsInLayer;
-    std::vector<float> input;
-    std::vector<float> output;
-    std::vector< std::vector <float> > weightMatrix;
+    std::vector<double> input;
+    std::vector<double> output;
+    std::vector< std::vector <double> > weightMatrix;
     LayerType layerType;
     ActivationFunction* activation;
 public:
-    Layer(unsigned int nLayer, unsigned int nPrev, LayerType lType, ActivationFunctionType act);
+    Layer(unsigned int nPrev, unsigned int nLayer, LayerType lType, ActivationFunctionType act);
     
     // Copy given input into layers input.
-    void setInput(const std::vector<float>& in);
+    void setInput(const std::vector<double>& in);
     
     // Copy given weight matrix into layers weight matrix.
-    void setWeightMatrix(const std::vector< std::vector<float> >& vM);
+    void setWeightMatrix(const std::vector< std::vector<double> >& vM);
     
+    std::vector<std::vector<double>> getWeightMatrix(void);
+
     void calculateOutput(void);
     
     // Calculates and returns Layer's output for given input.
-    std::vector<float> calculateOutput(const std::vector<float>& in);
+    std::vector<double> calculateOutput(const std::vector<double>& in);
     
-    std::vector<float> getOutput(void) const;
+    std::vector<double> getOutput(void) const;
     
+    unsigned int getNeuronsNumLayer() const;
+    unsigned int getNeuronsNumPrevLayer() const;
+
     // Release memory used by activation function pointer.
     ~Layer();
 };

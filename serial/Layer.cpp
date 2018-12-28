@@ -6,10 +6,15 @@ Layer::Layer(unsigned int nPrev, unsigned int nLayer, LayerType lType,  Activati
 	neuronsInLayer(nLayer),
     input(neuronsInPreviousLayer), // Construct input vector as a vector of size neuronsInPreviousLayer.
    	output(neuronsInLayer), // Construct output vector as a vector of size neuronsInLayer.
-   	weightMatrix(neuronsInLayer, std::vector<float>(neuronsInPreviousLayer)), // Construct weight matrix as matrix with neuronsInLayer rows and neuronsInPreviousLayer columns. 
+   	weightMatrix(neuronsInLayer, std::vector<double>(neuronsInPreviousLayer)), // Construct weight matrix as matrix with neuronsInLayer rows and neuronsInPreviousLayer columns. 
    	layerType(lType)
-   	{
-   		switch(act)
+{	
+		if(lType == INPUT)
+		{
+			neuronsInPreviousLayer = neuronsInLayer;
+			input.resize(neuronsInLayer);
+		}
+		switch(act)
 		{
 			case SIGMOID:
 				activation = new Sigmoid();
@@ -30,23 +35,31 @@ Layer::Layer(unsigned int nPrev, unsigned int nLayer, LayerType lType,  Activati
 				activation = new Sigmoid();
 				break;
 		}
-   	}
+}
 
-void Layer::setInput(const std::vector<float>& in)
+void Layer::setInput(const std::vector<double>& in)
 {
-	input = in;
+	if(in.size() != neuronsInPreviousLayer)
+		return;
+	else
+		input = in;
 }
     
 
-void Layer::setWeightMatrix(const std::vector< std::vector<float> >& vM)
+void Layer::setWeightMatrix(const std::vector< std::vector<double> >& vM)
 {
+	// If dimensions don't agree return.
+	if(vM.size() != neuronsInLayer)
+		return;
 	for(unsigned int i = 0; i < neuronsInLayer; ++i)
 	{
-		for(unsigned int j = 0; j < neuronsInPreviousLayer; ++j)
-		{
-			weightMatrix[i][j] = vM[i][j];
-		}
+		weightMatrix[i] = vM[i];
 	}
+}
+
+std::vector<std::vector<double>> Layer::getWeightMatrix(void)
+{
+	return weightMatrix;
 }
 
 void Layer::calculateOutput(void)
@@ -76,10 +89,14 @@ void Layer::calculateOutput(void)
 	}
 }
 
-std::vector<float> Layer::calculateOutput(const std::vector<float>& in)
+std::vector<double> Layer::calculateOutput(const std::vector<double>& in)
 {
+
+	if(in.size() != neuronsInPreviousLayer)
+		return std::vector<double>{0};
+
 	// Temporary output.
-	std::vector<float> out(neuronsInLayer);
+	std::vector<double> out(neuronsInLayer);
 	
 	if(layerType == INPUT)
 	{
@@ -103,11 +120,22 @@ std::vector<float> Layer::calculateOutput(const std::vector<float>& in)
 		    out[i] = activation->calculate(out[i]);
 		}
 	}
+	return out;
 }
 
-std::vector<float> Layer::getOutput(void) const
+std::vector<double> Layer::getOutput(void) const
 {
 	return output;
+}
+
+unsigned int Layer::getNeuronsNumLayer() const
+{
+	return neuronsInLayer;
+}
+
+unsigned int Layer::getNeuronsNumPrevLayer() const
+{
+	return neuronsInPreviousLayer;
 }
 
 Layer::~Layer()

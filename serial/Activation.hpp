@@ -7,22 +7,22 @@
 class ActivationFunction
 {
 public:
-	virtual float calculate(const float& x) = 0;
+	virtual double calculate(double x) = 0;
 };
 
 class Sigmoid : public ActivationFunction
 {
 public:
-	float calculate(const float& x)
+	double calculate(double x)
 	{
-		return 1 / (1 + exp(-x));
+		return (1 / (1 + exp(-1.0 * x)));
 	}
 };
 
 class Identity : public ActivationFunction
 {
 public:
-	float calculate(const float& x)
+	double calculate(double x)
 	{
 		return x;
 	}
@@ -31,25 +31,25 @@ public:
 class TanH : public ActivationFunction
 {
 public:
-	float calculate(const float& x)
+	double calculate(double x)
 	{
-		return (exp(x) - exp(-x)) / (exp(x) + exp(-x));
+		return ((exp(x) - exp(-1.0 * x)) / (exp(x) + exp(-1.0 * x)));
 	}
 };
 
 class ArcTan : public ActivationFunction
 {
 public:
-	float calculate(const float& x)
+	double calculate(double x)
 	{
-		return atan(-x);
+		return atan(-1.0 * x);
 	}
 };
 
 class BinaryStep : public ActivationFunction
 {
 public:
-	float calculate(const float& x)
+	double calculate(double x)
 	{
 		return (x < 0) ? 0 : 1;
 	}
