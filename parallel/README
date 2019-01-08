@@ -1,0 +1,15 @@
+To compile type:
+	make 
+
+By default this command will make release version of program
+If you want to debug program compile with:
+
+	make debug
+
+Explicitly creating relese version:
+
+	make release
+
+To run program type:
+
+	make test
