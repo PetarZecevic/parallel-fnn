@@ -1,6 +1,76 @@
 #include <cmath>
 #include "LayerP.hpp"
 
+
+class LTaskContinuation : public tbb::task
+{
+	tbb::task* execute()
+	{
+		return NULL;
+	}
+};
+
+// Helper class for Layer output calculation.
+class LTask : public tbb::task
+{	
+	const std::vector<double>& input;
+	const std::vector<std::vector <double> >& weightMatrix;
+	std::vector<double>& output;
+	unsigned int rowBegin;
+	unsigned int rowEnd;
+	unsigned int columns;
+	ActivationFunction* actFun;
+	bool isInLayer;
+public:
+	LTask(const std::vector<double>& in, const std::vector< std::vector<double> >& w, std::vector<double>& out, unsigned int begin, unsigned int end, unsigned int col, ActivationFunction* fun, bool inLayer) : 
+		input(in),
+		weightMatrix(w),
+		output(out),
+		rowBegin(begin),
+		rowEnd(end),
+		columns(col),
+		actFun(fun),
+		isInLayer(inLayer)
+	{}
+	
+	void performSerial();
+	tbb::task* execute();
+};
+
+
+// Class for parallel multiplication of two vectors used in parallel_reduce template.
+// It's assumed that vectors have same number of elements.
+class VectorMultiply
+{
+	const std::vector<double>& my_vec1;
+	const std::vector<double>& my_vec2;
+public:
+	double my_result;
+	void operator() (const tbb::blocked_range<size_t>& r)
+	{
+		double tmp_result = my_result;
+		for(size_t i = r.begin(); i != r.end(); ++i)
+		{
+			tmp_result += (my_vec1[i] * my_vec2[i]);
+		}
+		my_result = tmp_result;
+	}
+	VectorMultiply(const std::vector<double>& vec1, const std::vector<double>& vec2):
+		my_vec1(vec1),
+		my_vec2(vec2),
+		my_result(0)
+	{}
+	VectorMultiply(VectorMultiply& vm, tbb::split) :
+		my_vec1(vm.my_vec1),
+		my_vec2(vm.my_vec2),
+		my_result(0)
+	{}
+	void join(const VectorMultiply& vm)
+	{
+		my_result += vm.my_result;
+	}
+};
+
 void LTask::performSerial()
 {
 	if(isInLayer)
@@ -29,8 +99,17 @@ tbb::task* LTask::execute()
 	unsigned int rows = rowEnd - rowBegin;
 	unsigned int P = rows * columns;
 	if(P <= 10000 || rows == 1)
-	{
-		performSerial();
+	{	
+		if(rows == 1)
+		{
+			VectorMultiply reductor(weightMatrix[rowBegin], input);
+			tbb::parallel_reduce(tbb::blocked_range<size_t>(0, columns, 1000), reductor);
+			output[rowBegin] = reductor.my_result;
+		}
+		else
+		{
+			performSerial();
+		}
 		return NULL;		
 	}
 	else

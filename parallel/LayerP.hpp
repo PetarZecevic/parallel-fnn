@@ -3,46 +3,12 @@
 
 #include <vector>
 #include "ActivationP.hpp"
+#include "tbb/tbb.h"
+#include "tbb/parallel_reduce.h"
 #include "tbb/task.h"
 
-typedef enum{INPUTP , HIDDENP, OUTPUTP}LayerTypeP;
 typedef enum {SIGMOIDP, IDENTITYP, TANHP, ARCTANP, BINARYP}ActivationFunctionTypeP;
-
-
-
-class LTaskContinuation : public tbb::task
-{
-	tbb::task* execute()
-	{
-		return NULL;
-	}
-};
-
-class LTask : public tbb::task
-{	
-	const std::vector<double>& input;
-	const std::vector<std::vector <double> >& weightMatrix;
-	std::vector<double>& output;
-	unsigned int rowBegin;
-	unsigned int rowEnd;
-	unsigned int columns;
-	ActivationFunction* actFun;
-	bool isInLayer;
-public:
-	LTask(const std::vector<double>& in, const std::vector< std::vector<double> >& w, std::vector<double>& out, unsigned int begin, unsigned int end, unsigned int col, ActivationFunction* fun, bool inLayer) : 
-		input(in),
-		weightMatrix(w),
-		output(out),
-		rowBegin(begin),
-		rowEnd(end),
-		columns(col),
-		actFun(fun),
-		isInLayer(inLayer)
-	{}
-	
-	void performSerial();
-	tbb::task* execute();
-};
+typedef enum{INPUTP , HIDDENP, OUTPUTP}LayerTypeP;
 
 /*
 Class that models one layer in Neural Network.
