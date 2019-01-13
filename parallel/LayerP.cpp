@@ -104,7 +104,7 @@ tbb::task* LTask::execute()
 		{
 			VectorMultiply reductor(weightMatrix[rowBegin], input);
 			tbb::parallel_reduce(tbb::blocked_range<size_t>(0, columns, 1000), reductor);
-			output[rowBegin] = reductor.my_result;
+			output[rowBegin] = actFun->calculate(reductor.my_result);
 		}
 		else
 		{
