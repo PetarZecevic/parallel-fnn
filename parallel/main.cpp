@@ -1,13 +1,11 @@
 #include <iostream>
 #include <cstdlib>
 #include "FFNN4P.hpp"
-#include "tbb/tick_count.h"
 
 // Scales pseudo-random number into [-1,1] range.
 #define	RANDOM	(-1.0 +	2.0*(double)rand() / RAND_MAX)
 
 using namespace std;
-using namespace tbb;
 
 /*
 Initial assumption is that matrix is regular,
@@ -35,57 +33,28 @@ void RandInitVector(vector<double>& vec)
     }
 }
 
-void PrintMatrix(const vector< vector<double> >& matrix)
-{
-	const unsigned int rowNum = matrix.size();
-	const unsigned int colNum = matrix[0].size();
-	
-	for(unsigned int i = 0; i < rowNum; i++)
-    {
-    	cout << "[ ";
-        for(unsigned int j = 0; j < colNum; j++)
-        {
-            cout << "( " << matrix[i][j] << " ) ";
-        }
-        cout << "]" << endl;
-    }
-}
-
 int main(void)
 {   
-    srand(time(NULL));
-
-    unsigned int n1 = 147;
-    unsigned int n2 = 10123;
-    unsigned int n3 = 763;
-    unsigned int n4 = 41;
-
-    testSubmatrices(n1, 1);
-    testSubmatrices(n2, n1);
-    testSubmatrices(n3, n2);
-    testSubmatrices(n4, n3);
-
-    vector<vector<double>> w1(n2, vector<double>(n1));
-    vector<vector<double>> w2(n3, vector<double>(n2));
-    vector<vector<double>> w3(n4, vector<double>(n3));
+    // Nerons per layer.
+    vector<unsigned int> neurons = {1000, 1000, 1000, 1000};
+    // Weight matrices.
+    vector<vector<double> > w1(neurons[1], vector<double>(neurons[0]));
+    vector< vector<double> > w2(neurons[2], vector<double>(neurons[1]));
+    vector< vector<double> > w3(neurons[3], vector<double>(neurons[2]));
+    // Input vector.
+    vector<double> input(neurons[0]);
     
-    vector<double> input(n1);
-
+    // Initialize Matrices.
     RandInitMatrix(w1);
     RandInitMatrix(w2);
     RandInitMatrix(w3);
+    // Init vector.   
     RandInitVector(input);
-       
-    FFNN4P netP(n1, n2, n3, n4, SIGMOIDP);
-
+   	
+    // Create Network.
+    FFNN4P netP(neurons[0], neurons[1], neurons[2], neurons[3]);
     netP.setWeightMatrices(w1, w2, w3);
-
-    tbb::tick_count start, end;
- 
-    start = tbb::tick_count::now();
-    vector<double> output1 = netP.calculateOutput(input);
-    end = tbb::tick_count::now();
-    cout << "Time: " << (end - start).seconds() * 1000 << endl;
-
+    vector<double> output = netP.calculateOutput(input);
+    
     return 0;
 }

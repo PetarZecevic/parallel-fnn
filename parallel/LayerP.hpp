@@ -7,6 +7,9 @@
 #include "tbb/parallel_reduce.h"
 #include "tbb/task.h"
 
+#define P 10000 // Task job parameter.
+#define G 1000 // Parallel reduce parameter.
+
 typedef enum {SIGMOIDP, IDENTITYP, TANHP, ARCTANP, BINARYP}
 	ActivationFunctionTypeP;
 

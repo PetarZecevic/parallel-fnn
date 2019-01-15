@@ -104,21 +104,18 @@ void LTask::performSerial()
 tbb::task* LTask::execute()
 {
 	unsigned int rows = rowEnd - rowBegin;
-	unsigned int P = rows * columns;
-	if(P <= 10000 || rows == 1)
+	unsigned int elements = rows * columns;
+	if(elements <= P)
 	{	
-		if(rows == 1)
-		{
-			VectorMultiply reductor(weightMatrix[rowBegin], input);
-			tbb::parallel_reduce(tbb::blocked_range<size_t>(0, columns, 1000),
-								 reductor);
-			output[rowBegin] = actFun->calculate(reductor.my_result);
-		}
-		else
-		{
-			performSerial();
-		}
+		performSerial();
 		return NULL;		
+	}
+	else if(rows == 1)
+	{
+		VectorMultiply reductor(weightMatrix[rowBegin], input);
+		tbb::parallel_reduce(tbb::blocked_range<size_t>(0, columns, G),
+							 reductor);
+		output[rowBegin] = actFun->calculate(reductor.my_result);	
 	}
 	else
 	{

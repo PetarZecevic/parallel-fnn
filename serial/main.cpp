@@ -1,77 +1,60 @@
 #include <iostream>
-#include <vector>
-#include <algorithm>
 #include <cstdlib>
-#include <cmath>
-#include <random>
-
 #include "FFNN4.hpp"
+
+// Scales pseudo-random number into [-1,1] range.
+#define	RANDOM	(-1.0 +	2.0*(double)rand() / RAND_MAX)
 
 using namespace std;
 
-// Random number generator, probability distribution is normal distribution.
-normal_distribution<float> urd1{-1.0, 1.0};
-default_random_engine e;
-
-void RandInitWeigthMatrix(vector < vector <float> >& w)
+/*
+Initial assumption is that matrix is regular,
+that means that all columns has same number of elements.
+*/
+void RandInitMatrix(vector< vector<double> >& matrix)
 {
-    for(size_t i = 0 ; i < w.size(); ++i)
+    const unsigned int rowNum = matrix.size();
+    const unsigned int colNum = matrix[0].size();
+    for(unsigned int i = 0; i < rowNum; i++)
     {
-        for(size_t j = 0; j < w[i].size(); ++j)
+        for(unsigned int j = 0; j < colNum; j++)
         {
-            w[i][j] = urd1(e);
+            matrix[i][j] = RANDOM;
         }
     }
 }
 
-void PrintMatrix(const vector < vector <float> >& w)
+void RandInitVector(vector<double>& vec)
 {
-    for(size_t i = 0 ; i < w.size(); ++i)
+    const unsigned int vecSize = vec.size();
+    for(unsigned int i = 0; i < vecSize; i++)
     {
-        for(size_t j = 0; j < w[i].size(); ++j)
-        {
-            cout << "( " << w[i][j] << " )" << " ";
-        }
-        cout << endl;
+        vec[i] = RANDOM;
     }
 }
-
 
 int main(void)
 {
     // Nerons per layer.
-    vector<unsigned int> neurons = {10, 10, 10, 10};
-    
+    vector<unsigned int> neurons = {1000, 1000, 1000, 1000};
     // Weight matrices.
-    vector<vector<float> > w1(neurons[1], vector<float>(neurons[0]));
-    vector< vector<float> > w2(neurons[2], vector<float>(neurons[1]));
-    vector< vector<float> > w3(neurons[3], vector<float>(neurons[2]));
+    vector<vector<double> > w1(neurons[1], vector<double>(neurons[0]));
+    vector< vector<double> > w2(neurons[2], vector<double>(neurons[1]));
+    vector< vector<double> > w3(neurons[3], vector<double>(neurons[2]));
+    // Input vector.
+    vector<double> input(neurons[0]);
     
     // Initialize Matrices.
-    RandInitWeigthMatrix(w1);
-    RandInitWeigthMatrix(w2);
-    RandInitWeigthMatrix(w3);
-    
-    // Random Network input.
-    vector<float> input(neurons[0]);
-    for(size_t i = 0; i < neurons[0]; i++)
-    {
-        input[i] = urd1(e);
-    }
-    
+    RandInitMatrix(w1);
+    RandInitMatrix(w2);
+    RandInitMatrix(w3);
+    // Init vector.   
+    RandInitVector(input);
    	
     // Create Network.
     FFNN4 net(neurons[0], neurons[1], neurons[2], neurons[3]);
-    
     net.setWeightMatrices(w1, w2, w3);
-    vector<float> output = net.calculateOutput(input);
+    vector<double> output = net.calculateOutput(input);
 
-    // Print output.
-    for(size_t i = 0; i < neurons[3]; i++)
-    {
-        cout << output[i] << endl;
-    }
-    cout << endl << endl;
-    
     return 0;
 }
