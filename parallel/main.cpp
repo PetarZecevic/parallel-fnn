@@ -53,37 +53,39 @@ void PrintMatrix(const vector< vector<double> >& matrix)
 
 int main(void)
 {   
-	
-    LayerP hiddenLayer(100, 100, HIDDEN, SIGMOID);
-    
-    vector<vector <double> > w(100, vector<double>(100));
-    RandInitMatrix(w);
-    
-    vector<double> input(100);
-    RandInitVector(input);
+    srand(time(NULL));
 
-    hiddenLayer.setWeightMatrix(w);
-    hiddenLayer.setInput(input);
-	
-	
-	tick_count startTime = tick_count::now();
-    hiddenLayer.calculateOutput();
-	tick_count endTime = tick_count::now();
-	
-	cout << "Parallel execution time :" << (endTime-startTime).seconds()*1000 << "ms." << endl;
-	
-	
-	startTime = tick_count::now();
-    hiddenLayer.calculateOutputSerial();
-	endTime = tick_count::now();
-	
-	cout << "Serial execution time :" << (endTime-startTime).seconds()*1000 << "ms." << endl;
-	
-	/*
-	vector< vector<double> > m (100, vector<double>(100));
-	RandInitMatrix(m);
-	PrintMatrix(m);	
-	*/
-	
+    unsigned int n1 = 147;
+    unsigned int n2 = 10123;
+    unsigned int n3 = 763;
+    unsigned int n4 = 41;
+
+    testSubmatrices(n1, 1);
+    testSubmatrices(n2, n1);
+    testSubmatrices(n3, n2);
+    testSubmatrices(n4, n3);
+
+    vector<vector<double>> w1(n2, vector<double>(n1));
+    vector<vector<double>> w2(n3, vector<double>(n2));
+    vector<vector<double>> w3(n4, vector<double>(n3));
+    
+    vector<double> input(n1);
+
+    RandInitMatrix(w1);
+    RandInitMatrix(w2);
+    RandInitMatrix(w3);
+    RandInitVector(input);
+       
+    FFNN4P netP(n1, n2, n3, n4, SIGMOIDP);
+
+    netP.setWeightMatrices(w1, w2, w3);
+
+    tbb::tick_count start, end;
+ 
+    start = tbb::tick_count::now();
+    vector<double> output1 = netP.calculateOutput(input);
+    end = tbb::tick_count::now();
+    cout << "Time: " << (end - start).seconds() * 1000 << endl;
+
     return 0;
 }

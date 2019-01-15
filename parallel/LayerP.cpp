@@ -1,6 +1,4 @@
-#include <cmath>
 #include "LayerP.hpp"
-
 
 class LTaskContinuation : public tbb::task
 {
@@ -22,10 +20,15 @@ class LTask : public tbb::task
 	ActivationFunction* actFun;
 	bool isInLayer;
 public:
-	LTask(const std::vector<double>& in, const std::vector< std::vector<double> >& w, std::vector<double>& out, unsigned int begin, unsigned int end, unsigned int col, ActivationFunction* fun, bool inLayer) : 
+	LTask(const std::vector<double>& in, 
+		  const std::vector< std::vector<double> >& w, 
+		  std::vector<double>& out, 
+		  unsigned int begin, unsigned int end, unsigned int col, 
+		  ActivationFunction* fun, 
+		  bool inLayer) : 
 		input(in),
 		weightMatrix(w),
-		output(out),
+		output(out),     
 		rowBegin(begin),
 		rowEnd(end),
 		columns(col),
@@ -38,8 +41,11 @@ public:
 };
 
 
-// Class for parallel multiplication of two vectors used in parallel_reduce template.
-// It's assumed that vectors have same number of elements.
+/* 	
+	Class for parallel multiplication of two vectors 
+	used in parallel_reduce template.
+ 	It's assumed that vectors have same number of elements.
+*/
 class VectorMultiply
 {
 	const std::vector<double>& my_vec1;
@@ -55,7 +61,8 @@ public:
 		}
 		my_result = tmp_result;
 	}
-	VectorMultiply(const std::vector<double>& vec1, const std::vector<double>& vec2):
+	VectorMultiply(const std::vector<double>& vec1, 
+				   const std::vector<double>& vec2):
 		my_vec1(vec1),
 		my_vec2(vec2),
 		my_result(0)
@@ -103,7 +110,8 @@ tbb::task* LTask::execute()
 		if(rows == 1)
 		{
 			VectorMultiply reductor(weightMatrix[rowBegin], input);
-			tbb::parallel_reduce(tbb::blocked_range<size_t>(0, columns, 1000), reductor);
+			tbb::parallel_reduce(tbb::blocked_range<size_t>(0, columns, 1000),
+								 reductor);
 			output[rowBegin] = actFun->calculate(reductor.my_result);
 		}
 		else
@@ -117,24 +125,26 @@ tbb::task* LTask::execute()
 		unsigned int halfInterval = (rowEnd - rowBegin) / 2;
 		unsigned int middle = rowBegin + halfInterval;
 		
-		LTaskContinuation& c = *new(tbb::task::allocate_continuation()) LTaskContinuation();
-		//LTask& left = *new(c.allocate_child()) LTask(input, weightMatrix, output, rowBegin, middle, columns, actFun, isInLayer);
-		LTask& right = *new(c.allocate_child()) LTask(input, weightMatrix, output, middle, rowEnd, columns, actFun, isInLayer);
+		LTaskContinuation& c = *new(tbb::task::allocate_continuation()) 
+			LTaskContinuation();
+		LTask& right = *new(c.allocate_child()) 
+			LTask(input, weightMatrix, output, 
+				  middle, rowEnd, columns, actFun, isInLayer);
 		tbb::task::recycle_as_child_of(c);
 		rowEnd = middle;
 		c.set_ref_count(2);
 		spawn(right);
-		//return &left;
 		return this;
 	}					
 }
 
-LayerP::LayerP(unsigned int nPrev, unsigned int nLayer, LayerTypeP lType,  ActivationFunctionTypeP act):
+LayerP::LayerP(unsigned int nPrev, unsigned int nLayer, LayerTypeP lType,  
+			   ActivationFunctionTypeP act):
 	neuronsInPreviousLayer(nPrev),
 	neuronsInLayer(nLayer),
-    input(neuronsInPreviousLayer), // Construct input vector as a vector of size neuronsInPreviousLayer.
-   	output(neuronsInLayer), // Construct output vector as a vector of size neuronsInLayer.
-   	weightMatrix(neuronsInLayer, std::vector<double>(neuronsInPreviousLayer)), // Construct weight matrix as matrix with neuronsInLayer rows and neuronsInPreviousLayer columns. 
+    input(neuronsInPreviousLayer),
+   	output(neuronsInLayer),
+   	weightMatrix(neuronsInLayer, std::vector<double>(neuronsInPreviousLayer)), 
    	layerType(lType)
 {	
 		if(lType == INPUTP)
@@ -173,7 +183,10 @@ void LayerP::setInput(const std::vector<double>& in)
 		input = in;
 }
     
-
+/*
+	It's assumed that matrix is regular, 
+	that means that all columns have same number of elements.
+*/
 void LayerP::setWeightMatrix(const std::vector< std::vector<double> >& vM)
 {
 	// If dimensions don't agree return.
@@ -195,12 +208,16 @@ void LayerP::action(const std::vector<double>& in, std::vector<double>& out)
 	
 	if(layerType == INPUTP)
 	{
-		LTask& root = *new(tbb::task::allocate_root()) LTask(in, weightMatrix, out, 0, neuronsInLayer, 1, activation, true);
+		LTask& root = *new(tbb::task::allocate_root()) 
+			LTask(in, weightMatrix, out, 0, neuronsInLayer, 
+				  1, activation, true);
 		tbb::task::spawn_root_and_wait(root);
 	}
 	else
 	{
-		LTask& root = *new(tbb::task::allocate_root()) LTask(in, weightMatrix, out, 0, neuronsInLayer, neuronsInPreviousLayer, activation, false);
+		LTask& root = *new(tbb::task::allocate_root()) 
+			LTask(in, weightMatrix, out, 0, neuronsInLayer, 
+				  neuronsInPreviousLayer, activation, false);
 		tbb::task::spawn_root_and_wait(root);
 	}
 }

@@ -1,12 +1,13 @@
 #include <cmath>
 #include "Layer.hpp"
 
-Layer::Layer(unsigned int nPrev, unsigned int nLayer, LayerType lType,  ActivationFunctionType act):
+Layer::Layer(unsigned int nPrev, unsigned int nLayer, LayerType lType,  
+			 ActivationFunctionType act):
 	neuronsInPreviousLayer(nPrev),
 	neuronsInLayer(nLayer),
-    input(neuronsInPreviousLayer), // Construct input vector as a vector of size neuronsInPreviousLayer.
-   	output(neuronsInLayer), // Construct output vector as a vector of size neuronsInLayer.
-   	weightMatrix(neuronsInLayer, std::vector<double>(neuronsInPreviousLayer)), // Construct weight matrix as matrix with neuronsInLayer rows and neuronsInPreviousLayer columns. 
+    input(neuronsInPreviousLayer),
+   	output(neuronsInLayer),
+   	weightMatrix(neuronsInLayer, std::vector<double>(neuronsInPreviousLayer)),
    	layerType(lType)
 {	
 		if(lType == INPUT)
@@ -62,45 +63,12 @@ std::vector<std::vector<double>> Layer::getWeightMatrix(void)
 	return weightMatrix;
 }
 
-void Layer::calculateOutput(void)
+void Layer::action(const std::vector<double>& in, std::vector<double>& out)
 {
 	if(layerType == INPUT)
 	{
-		// In case of input layer, just apply activation function to input vector.
-		for(unsigned int i = 0; i < neuronsInLayer; ++i)
-		{
-		    //output[i] = 1 / (1 + exp(-input[i]));
-		    output[i] = activation->calculate(input[i]);
-		}
-	}
-	else
-	{
-		// Multiply weigth matrix with input vector.
-		for(unsigned int i = 0; i < neuronsInLayer; ++i)
-		{
-		    output[i] = 0;
-		    for(unsigned int j = 0; j < neuronsInPreviousLayer; ++j)
-		    {
-		        output[i] += weightMatrix[i][j] * input[j];
-		    }
-		    // Apply activation function.
-		    output[i] = activation->calculate(output[i]);
-		}
-	}
-}
-
-std::vector<double> Layer::calculateOutput(const std::vector<double>& in)
-{
-
-	if(in.size() != neuronsInPreviousLayer)
-		return std::vector<double>{0};
-
-	// Temporary output.
-	std::vector<double> out(neuronsInLayer);
-	
-	if(layerType == INPUT)
-	{
-		// In case of input layer, just apply activation function to input vector.
+		// In case of input layer, just apply activation function 
+		// to input vector.
 		for(unsigned int i = 0; i < neuronsInLayer; ++i)
 		{
 		    out[i] = activation->calculate(in[i]);
@@ -120,6 +88,22 @@ std::vector<double> Layer::calculateOutput(const std::vector<double>& in)
 		    out[i] = activation->calculate(out[i]);
 		}
 	}
+}
+
+void Layer::calculateOutput(void)
+{
+	action(input, output);
+}
+
+std::vector<double> Layer::calculateOutput(const std::vector<double>& in)
+{
+
+	if(in.size() != neuronsInPreviousLayer)
+		return std::vector<double>{0};
+
+	// Temporary output.
+	std::vector<double> out(neuronsInLayer);
+	action(in ,out);
 	return out;
 }
 

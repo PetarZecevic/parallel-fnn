@@ -20,8 +20,10 @@ class Layer
     std::vector< std::vector <double> > weightMatrix;
     LayerType layerType;
     ActivationFunction* activation;
+    void action(const std::vector<double>& in, std::vector<double>& out);
 public:
-    Layer(unsigned int nPrev, unsigned int nLayer, LayerType lType, ActivationFunctionType act);
+    Layer(unsigned int nPrev, unsigned int nLayer, LayerType lType, 
+    	  ActivationFunctionType act);
     
     // Copy given input into layers input.
     void setInput(const std::vector<double>& in);

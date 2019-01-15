@@ -19,11 +19,14 @@ class FFNN4P
     void action(const std::vector<double>& in, std::vector<double>& out);
 public:
     FFNN4P(unsigned int neuronsInput,unsigned int neuronsHidden1,
-    	  unsigned int neuronsHidden2,unsigned int neuronsOutput, ActivationFunctionTypeP act = SIGMOIDP);
+    	  unsigned int neuronsHidden2,unsigned int neuronsOutput, 
+    	  ActivationFunctionTypeP act = SIGMOIDP);
     
     void setInput(const std::vector<double>& in);
     
-    void setWeightMatrices(const std::vector< std::vector <double> >& w1, const std::vector< std::vector<double> >& w2, const std::vector< std::vector<double> >& w3);
+    void setWeightMatrices(const std::vector< std::vector <double> >& w1, 
+    					   const std::vector< std::vector<double> >& w2,
+    					   const std::vector< std::vector<double> >& w3);
     
     // Get inputs from input field and store result in output field.
     void calculateOutput(void);

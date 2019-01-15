@@ -7,8 +7,11 @@
 #include "tbb/parallel_reduce.h"
 #include "tbb/task.h"
 
-typedef enum {SIGMOIDP, IDENTITYP, TANHP, ARCTANP, BINARYP}ActivationFunctionTypeP;
-typedef enum{INPUTP , HIDDENP, OUTPUTP}LayerTypeP;
+typedef enum {SIGMOIDP, IDENTITYP, TANHP, ARCTANP, BINARYP}
+	ActivationFunctionTypeP;
+
+typedef enum{INPUTP , HIDDENP, OUTPUTP}
+	LayerTypeP;
 
 /*
 Class that models one layer in Neural Network.
@@ -25,7 +28,8 @@ class LayerP
     ActivationFunction* activation;
     void action(const std::vector<double>& in, std::vector<double>& out);
 public:
-    LayerP(unsigned int nPrev, unsigned int nLayer, LayerTypeP lType, ActivationFunctionTypeP act);
+    LayerP(unsigned int nPrev, unsigned int nLayer, 
+    	   LayerTypeP lType, ActivationFunctionTypeP act);
     
     // Copy given input into layers input.
     void setInput(const std::vector<double>& in);
@@ -39,7 +43,7 @@ public:
     
     // Calculates and returns Layer's output for given input.
     std::vector<double> calculateOutput(const std::vector<double>& in);
-    
+
     std::vector<double> getOutput(void) const;
     
     unsigned int getNeuronsNumLayer() const;

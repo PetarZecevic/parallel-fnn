@@ -1,7 +1,8 @@
 #include "FFNN4P.hpp"
 
 FFNN4P::FFNN4P(unsigned int neuronsInput,unsigned int neuronsHidden1,
-			unsigned int neuronsHidden2,unsigned int neuronsOutput, ActivationFunctionTypeP act):
+			unsigned int neuronsHidden2,unsigned int neuronsOutput, 
+			ActivationFunctionTypeP act):
     inputLayer(neuronsInput, neuronsInput, INPUTP, act),
     hiddenLayer1(neuronsInput, neuronsHidden1, HIDDENP, act),
     hiddenLayer2(neuronsHidden1, neuronsHidden2, HIDDENP, act),
@@ -20,7 +21,9 @@ void FFNN4P::setInput(const std::vector<double>& in)
         input = in;
 }
 
-void FFNN4P::setWeightMatrices(const std::vector< std::vector <double> >& w1, const std::vector< std::vector<double> >& w2, const std::vector< std::vector<double> >& w3)
+void FFNN4P::setWeightMatrices(const std::vector< std::vector <double> >& w1, 
+							   const std::vector< std::vector<double> >& w2, 
+							   const std::vector< std::vector<double> >& w3)
 {
     // Check dimensions
     if(w1.size() != hiddenLayer1.getNeuronsNumLayer() ||
