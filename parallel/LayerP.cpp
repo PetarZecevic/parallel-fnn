@@ -1,5 +1,6 @@
 #include "LayerP.hpp"
 
+// Class used for optimizing task scheduling in LTask class.
 class LTaskContinuation : public tbb::task
 {
 	tbb::task* execute()

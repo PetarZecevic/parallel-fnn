@@ -7,8 +7,8 @@
 #include "tbb/parallel_reduce.h"
 #include "tbb/task.h"
 
-#define P 10000 // Task job parameter.
-#define G 1000 // Parallel reduce parameter.
+#define P 100000 // Task job parameter.
+#define G 10000 // Parallel reduce parameter.
 
 typedef enum {SIGMOIDP, IDENTITYP, TANHP, ARCTANP, BINARYP}
 	ActivationFunctionTypeP;
@@ -41,7 +41,9 @@ public:
     void setWeightMatrix(const std::vector< std::vector<double> >& vM);
     
     std::vector<std::vector<double>> getWeightMatrix(void);
-
+	
+	// Calculates network output, using local input and stores result in local
+	// output. 
     void calculateOutput(void);
     
     // Calculates and returns Layer's output for given input.
